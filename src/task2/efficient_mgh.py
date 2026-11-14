@@ -17,6 +17,9 @@ def efficient_multiplicate_graph_hopper(
 
     for u in G.nodes():
         for v in H.nodes():
+            if k_v(u, v) == 0:
+                continue
+
             G_x_H = product_graph_dag(G_shortest_path_dags[u], H_shortest_path_dags[v], vertex_label)
             topological_order = list(nx.topological_sort(G_x_H))
 
