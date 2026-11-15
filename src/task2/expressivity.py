@@ -35,6 +35,3 @@ def expressivity_analysis_multiplicative_graph_hopper():
 
 if __name__ == "__main__":
     expressivity_analysis_multiplicative_graph_hopper()
-
-if __name__ == "__main__":
-    expressivity_analysis_multiplicative_graph_hopper()
