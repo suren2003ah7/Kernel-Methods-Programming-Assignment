@@ -17,6 +17,7 @@ graphs = dataset.data
 labels = np.asarray(dataset.target)
 
 C_VALUES = 10.0 ** np.arange(-3, 4)
+H_VALUES = range(6)
 
 
 class PrecomputedKernelSVC(ClassifierMixin, BaseEstimator):
@@ -75,9 +76,25 @@ def wl_kernel_svm(graphs, labels, c_values=None, h=5):
 
     return accs, train_accs
 
-def wl_with_joint_grid_search_cross_val(graphs, labels):
+
+def compute_wl_gram_matrices(graphs, h_values=H_VALUES):
+    gram_matrices = {}
+    for h in h_values:
+        if h == 0:
+            kernel = VertexHistogram(normalize=True)
+        else:
+            kernel = WeisfeilerLehman(
+                n_iter=h,
+                base_graph_kernel=VertexHistogram,
+                normalize=True,
+            )
+        gram_matrices[h] = kernel.fit_transform(graphs)
+    return gram_matrices
+
+
+def wl_with_joint_grid_search_cross_val(graphs, labels, full_gram_matrices):
     c_values = C_VALUES
-    h_values = range(6)
+    h_values = H_VALUES
 
     outer_cv = KFold(n_splits=10, shuffle=True, random_state=42)
     inner_cv = KFold(n_splits=5, shuffle=True, random_state=43)
@@ -89,24 +106,13 @@ def wl_with_joint_grid_search_cross_val(graphs, labels):
     for fold, (train_idx, test_idx) in enumerate(
         outer_cv.split(np.zeros(len(labels)), labels), start=1
     ):
-        train_graphs = [graphs[i] for i in train_idx]
-        test_graphs = [graphs[i] for i in test_idx]
         y_train = labels[train_idx]
         y_test = labels[test_idx]
 
-        gram_matrices = {}
-        kernels = {}
-        for h in h_values:
-            if h == 0:
-                kernel = VertexHistogram(normalize=True)
-            else:
-                kernel = WeisfeilerLehman(
-                    n_iter=h,
-                    base_graph_kernel=VertexHistogram,
-                    normalize=True,
-                )
-            gram_matrices[h] = kernel.fit_transform(train_graphs)
-            kernels[h] = kernel
+        gram_matrices = {   # Select fold matrices from global gram matrices
+            h: full_gram_matrices[h][np.ix_(train_idx, train_idx)]
+            for h in h_values
+        }
 
         search = GridSearchCV(
             PrecomputedKernelSVC(gram_matrices=gram_matrices),
@@ -114,15 +120,15 @@ def wl_with_joint_grid_search_cross_val(graphs, labels):
             scoring="accuracy",
             cv=inner_cv,
         )
-        search.fit(np.arange(len(train_graphs)), y_train)
+        search.fit(np.arange(len(train_idx)), y_train)
 
         best_h = search.best_params_["h"]
         best_c = search.best_params_["C"]
-        test_kernel = kernels[best_h].transform(test_graphs)
+        test_kernel = full_gram_matrices[best_h][np.ix_(test_idx, train_idx)]   # Select Test kernel for best h from global gram
         y_pred = search.best_estimator_.predict_with_kernel(test_kernel)
         outer_predictions[test_idx] = y_pred
 
-        train_kernel = kernels[best_h].transform(train_graphs)
+        train_kernel = gram_matrices[best_h]
         y_pred_train = search.best_estimator_.predict_with_kernel(train_kernel)
         train_accuracy = accuracy_score(y_train, y_pred_train)
 
@@ -153,12 +159,14 @@ def wl_with_joint_grid_search_cross_val(graphs, labels):
     }
 
 
+gram_matrices = compute_wl_gram_matrices(graphs)
+
 results = []
 for h in range(6):
     print(f"Running WL kernel SVM with h={h}")
     results.append(wl_kernel_svm(graphs, labels, h=h))
 
-res = wl_with_joint_grid_search_cross_val(graphs, labels)
+res = wl_with_joint_grid_search_cross_val(graphs, labels, gram_matrices)
 
 
 ## Plot results
@@ -252,8 +260,8 @@ for ax in (comparison_test_ax, comparison_train_ax):
     ax.grid(True, alpha=0.3)
     ax.legend(title="h and evaluation", fontsize=8, ncol=2)
 
-comparison_test_ax.set_title("test curves and outer-CV predictions")
-comparison_train_ax.set_title("training curves")
+comparison_test_ax.set_title("test curves and optimization results")
+comparison_train_ax.set_title("training curves and optimization results")
 comparison_train_ax.set_xlabel("SVM regularization parameter C")
 comparison_fig.suptitle("WL SVM hyperparameter-optimization comparison")
 comparison_fig.tight_layout(rect=(0, 0, 1, 0.96))
