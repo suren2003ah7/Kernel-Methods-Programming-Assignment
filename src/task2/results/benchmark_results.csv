@@ -1,0 +1,21 @@
+Dataset,Kernel,Mean_Accuracy_Percent,Std_Accuracy_Percent,Gram_Time_Seconds
+MUTAG,VertexHist,81.67,15.72,0.0008
+MUTAG,ShortestPath,71.67,25.87,0.1031
+MUTAG,WeisfeilerLehman,78.33,22.42,0.0706
+MUTAG,GraphHopper,75.00,20.07,3.5971
+MUTAG,Kmgh (ours),80.00,19.44,1181.9050
+PTC_FM,VertexHist,65.00,13.84,0.0013
+PTC_FM,ShortestPath,73.33,11.06,0.0607
+PTC_FM,WeisfeilerLehman,68.33,13.84,0.0605
+PTC_FM,GraphHopper,61.67,13.02,4.1500
+PTC_FM,Kmgh (ours),71.67,16.75,365.1271
+ENZYMES,VertexHist,28.33,15.00,0.0004
+ENZYMES,ShortestPath,51.67,18.93,0.0994
+ENZYMES,WeisfeilerLehman,41.67,21.41,0.0817
+ENZYMES,GraphHopper,46.67,25.60,8.8763
+ENZYMES,Kmgh (ours),51.67,21.67,1858.1642
+PROTEINS_full,VertexHist,70.00,14.53,0.0005
+PROTEINS_full,ShortestPath,71.67,13.02,0.0937
+PROTEINS_full,WeisfeilerLehman,65.00,11.67,0.0789
+PROTEINS_full,GraphHopper,58.33,17.08,7.1829
+PROTEINS_full,Kmgh (ours),60.00,8.16,1199.6450

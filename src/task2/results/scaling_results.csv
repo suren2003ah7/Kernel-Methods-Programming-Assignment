@@ -1,0 +1,11 @@
+Graph_Family,Num_Vertices,Kmgh_Time_Seconds,ShortestPath_Time_Seconds,GraphHopper_Time_Seconds
+4-Regular (deg=4),10,2.2144,0.0063,0.0753
+4-Regular (deg=4),20,43.3018,0.0209,0.2959
+4-Regular (deg=4),30,250.1359,0.0465,0.6606
+4-Regular (deg=4),40,843.9220,0.0817,1.2183
+4-Regular (deg=4),50,2192.3679,0.1315,1.9399
+"Barabasi-Albert (m=2, avg deg~4)",10,2.0741,0.0054,0.0757
+"Barabasi-Albert (m=2, avg deg~4)",20,39.5646,0.0202,0.2932
+"Barabasi-Albert (m=2, avg deg~4)",30,234.5833,0.0540,0.7106
+"Barabasi-Albert (m=2, avg deg~4)",40,830.5467,0.0857,1.3420
+"Barabasi-Albert (m=2, avg deg~4)",50,2002.8086,0.1285,1.8953
